@@ -1,0 +1,3 @@
+sed -i 's|import { GodModePage } from "./pages/GodModePage";|import { GodModePage } from "./pages/GodModePage";\nimport { GrowthPage } from "./pages/GrowthPage";\nimport { CalendarPage } from "./pages/CalendarPage";\nimport { ScoringPage } from "./pages/ScoringPage";\nimport { ProfileIntelligencePage } from "./pages/ProfileIntelligencePage";|g' src/App.tsx
+
+sed -i 's|<Route index element={<DashboardPage />} />|<Route index element={<DashboardPage />} />\n              <Route path="growth" element={<GrowthPage />} />\n              <Route path="calendar" element={<CalendarPage />} />\n              <Route path="scoring" element={<ScoringPage />} />\n              <Route path="profile" element={<ProfileIntelligencePage />} />|g' src/App.tsx

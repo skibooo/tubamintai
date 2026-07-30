@@ -1,0 +1,3 @@
+sed -i 's|import { LayoutDashboard, Video, BarChart3, Settings, Shield, LogOut, CheckCircle2 } from "lucide-react";|import { LayoutDashboard, Video, BarChart3, Settings, Shield, LogOut, CheckCircle2, LineChart, Calendar, Target, BrainCircuit } from "lucide-react";|g' src/components/DashboardLayout.tsx
+
+sed -i 's|{ name: "Settings", href: "/app/settings", icon: Settings },|{ name: "Creator Growth", href: "/app/growth", icon: LineChart },\n  { name: "Content Calendar", href: "/app/calendar", icon: Calendar },\n  { name: "Quality Scoring", href: "/app/scoring", icon: Target },\n  { name: "Profile Intelligence", href: "/app/profile", icon: BrainCircuit },\n  { name: "Settings", href: "/app/settings", icon: Settings },|g' src/components/DashboardLayout.tsx

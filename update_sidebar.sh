@@ -1,0 +1,3 @@
+sed -i 's|import { Home, Plus, CheckCircle, BarChart2, Settings, Play, Youtube, Zap, Upload, Copy, LogOut } from "lucide-react";|import { Home, Plus, CheckCircle, BarChart2, Settings, Play, Youtube, Zap, Upload, Copy, LogOut, LineChart, Calendar, Target, BrainCircuit } from "lucide-react";|g' src/App.tsx
+
+sed -i 's|{ name: "Settings", path: "/app", icon: Settings },|{ name: "Creator Growth", path: "/app/growth", icon: LineChart },\n    { name: "Content Calendar", path: "/app/calendar", icon: Calendar },\n    { name: "Quality Scoring", path: "/app/scoring", icon: Target },\n    { name: "Profile Intelligence", path: "/app/profile", icon: BrainCircuit },\n    { name: "Settings", path: "/app", icon: Settings },|g' src/App.tsx
