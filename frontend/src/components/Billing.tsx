@@ -12,14 +12,14 @@ export default function Billing() {
   const [loading, setLoading] = useState<string | null>(null)
   const [error, setError] = useState('')
   const params = new URLSearchParams(window.location.search)
-const [selectedTier, setSelectedTier] = useState(params.get('tier') || 'Tier2_60')
+  const [selectedTier, setSelectedTier] = useState(params.get('tier') || 'Tier2_60')
 
   const handleSelect = async (tier: string) => {
     setError('')
     setLoading(tier)
     try {
       const token = localStorage.getItem('token')
-      const res = await fetch('http://localhost:3000/api/payments/initiate', {
+      const res = await fetch('http://https://tubamintai.onrender.com/api/payments/initiate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

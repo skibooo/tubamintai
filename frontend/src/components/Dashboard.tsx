@@ -25,10 +25,10 @@ export default function Dashboard() {
     try {
       const token = localStorage.getItem('token')
       const [channelsRes, cyclesRes] = await Promise.all([
-        fetch('http://localhost:3000/api/channels', {
+        fetch('http://https://tubamintai.onrender.com/api/channels', {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch('http://localhost:3000/api/automation/cycles', {
+        fetch('http://https://tubamintai.onrender.com/api/automation/cycles', {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ])

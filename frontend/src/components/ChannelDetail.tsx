@@ -33,12 +33,12 @@ export default function ChannelDetail() {
       const token = localStorage.getItem('token')
 
       const [channelsRes, cyclesRes] = await Promise.all([
-        fetch('http://localhost:3000/api/channels', {
+        fetch('http://https://tubamintai.onrender.com/api/channels', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }),
-        fetch('http://localhost:3000/api/automation/cycles', {
+        fetch('http://https://tubamintai.onrender.com/api/automation/cycles', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -134,7 +134,7 @@ export default function ChannelDetail() {
           onClick={() => {
             const token = localStorage.getItem('token')
 
-            window.location.href = `http://localhost:3000/api/auth/google?token=${token}`
+            window.location.href = `http://https://tubamintai.onrender.com/api/auth/google?token=${token}`
           }}
         >
           Connect YouTube Channel

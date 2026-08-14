@@ -17,7 +17,7 @@ const reference = urlParams.get('reference')
 
 if (reference) {
   const token = localStorage.getItem('token')
-  await fetch(`http://localhost:3000/api/payments/verify/${reference}`, {
+  await fetch(`http://https://tubamintai.onrender.com/api/payments/verify/${reference}`, {
     headers: { Authorization: `Bearer ${token}` },
   })
 }
@@ -30,7 +30,7 @@ if (reference) {
 
       try {
         const token = localStorage.getItem('token')
-        const res = await fetch('http://localhost:3000/api/automation/start', {
+        const res = await fetch('http://https://tubamintai.onrender.com/api/automation/start', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

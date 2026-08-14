@@ -37,7 +37,7 @@ export default function NewChannelModal({ onClose }: { onClose: () => void }) {
 
     try {
       const token = localStorage.getItem('token')
-      const res = await fetch('http://localhost:3000/api/channels', {
+      const res = await fetch('http://https://tubamintai.onrender.com/api/channels', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

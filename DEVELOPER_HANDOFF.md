@@ -19,7 +19,7 @@ Welcome to the YOUTUBAMINTAI codebase. The core architectural wiring, database s
 2. Ensure you have a local PostgreSQL database running, and set `DATABASE_URL` in `.env`.
 3. Run `npx prisma db push` to construct the database schema.
 4. Run `npm run dev` to start the server.
-5. The frontend runs at `http://localhost:3000`.
+5. The frontend runs at `http://https://tubamintai.onrender.com`.
 
 ## 4. How to Deploy
 1. The app is fully container-ready. 
