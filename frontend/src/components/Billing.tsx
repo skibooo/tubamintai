@@ -19,7 +19,7 @@ export default function Billing() {
     setLoading(tier)
     try {
       const token = localStorage.getItem('token')
-      const res = await fetch('http://https://tubamintai.onrender.com/api/payments/initiate', {
+      const res = await fetch('https://tubamintai.onrender.com/api/payments/initiate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
