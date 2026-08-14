@@ -37,7 +37,7 @@ paymentsRouter.post("/initiate", requireAuth, async (req, res) => {
         email: user.email,
         amount: amountNaira * 100, // Paystack expects kobo
         metadata: { userId: user.id, tier },
-        callback_url: "http://localhost:5173/payment-success",
+        callback_url: "https://tubamintai-2399-dusky.vercel.app/payment-success",
       }),
     });
 
