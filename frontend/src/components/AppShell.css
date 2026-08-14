@@ -1,0 +1,74 @@
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 220px;
+  background: var(--panel-2);
+  border-right: 1px solid var(--line);
+  padding: 24px 16px;
+  flex-shrink: 0;
+}
+
+.brand-mark {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 32px;
+  padding: 0 12px;
+}
+
+.rec-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--rec);
+  box-shadow: 0 0 0 3px rgba(255, 75, 62, 0.15);
+}
+
+.brand-mark span {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+
+.side-item {
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-bottom: 2px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.side-item.active {
+  background: var(--panel);
+  color: var(--text);
+}
+
+.side-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-faint);
+}
+
+.side-item.active .side-dot {
+  background: var(--rec);
+}
+
+.main {
+  flex: 1;
+  padding: 32px 36px;
+}
+
+.logo-img {
+  width: 100%;
+  max-width: 160px;
+  height: auto;
+}

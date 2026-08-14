@@ -1,0 +1,29 @@
+:root {
+  --bg: #0B0C0E;
+  --panel: #131418;
+  --panel-2: #1A1B20;
+  --line: #2A2C33;
+  --text: #EDEDEF;
+  --text-dim: #9295A0;
+  --text-faint: #5C5F6A;
+  --rec: #FF4B3E;
+  --live: #4FD1C5;
+  --amber: #F5B95A;
+
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}

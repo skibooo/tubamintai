@@ -1,0 +1,141 @@
+.main-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
+}
+
+.main-head h3 {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.main-head p {
+  color: var(--text-dim);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.new-btn {
+  background: var(--rec);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.ch-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.ch-card {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 18px;
+}
+
+.ch-card .row1 {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.ch-card .name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.ch-card .niche {
+  color: var(--text-bright);
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.status-pill {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 4px 8px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.status-pill.live {
+  background: rgba(79, 209, 197, 0.1);
+  color: var(--live);
+}
+
+.status-pill.live .d {
+  background: var(--live);
+}
+
+.status-pill.paused {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-dim);
+}
+
+.status-pill.paused .d {
+  background: var(--text-faint);
+}
+
+.status-pill .d {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
+
+.progress-track {
+  height: 4px;
+  background: var(--line);
+  border-radius: 2px;
+  margin-top: 16px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--live);
+}
+
+.ch-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+.empty-state {
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+  padding: 60px 24px;
+  text-align: center;
+}
+
+.empty-icon {
+  color: var(--rec);
+  font-size: 24px;
+  margin-bottom: 12px;
+}
+
+.empty-state h4 {
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 600;
+}
+
+.empty-state p {
+  color: var(--text-dim);
+  font-size: 13px;
+  margin-top: 8px;
+}

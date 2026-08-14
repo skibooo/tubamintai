@@ -1,0 +1,138 @@
+.login-screen {
+  display: flex;
+  min-height: 100vh;
+}
+
+.login-left {
+  width: 100%;
+  min-height: 100vh;
+  padding: 64px 56px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.brand-mark {
+  margin-bottom: 48px;
+}
+
+.logo-img {
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+}
+
+.login-left h2 {
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 600;
+  max-width: 340px;
+  line-height: 1.2;
+}
+
+.login-left p {
+  color: var(--text-dim);
+  margin-top: 14px;
+  font-size: 14px;
+  max-width: 420px;
+}
+
+.field {
+  margin-top: 28px;
+  max-width: 420px;
+}
+
+.field label {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  display: block;
+}
+
+.field .input {
+  margin-top: 8px;
+  height: 42px;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel-2);
+  padding: 0 12px;
+  color: var(--text);
+  font-size: 13px;
+  font-family: var(--font-body);
+}
+
+.field .input::placeholder {
+  color: var(--text-faint);
+}
+
+.btn-primary {
+  margin-top: 28px;
+  height: 44px;
+  max-width: 320px;
+  width: 100%;
+  background: var(--text);
+  color: #0B0C0E;
+  border: none;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.error-text {
+  color: var(--rec);
+  font-size: 12px;
+  margin-top: 12px;
+}
+
+.waveform {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 80px;
+}
+
+.waveform div {
+  width: 4px;
+  background: linear-gradient(to top, var(--rec), var(--amber));
+  border-radius: 2px;
+  opacity: 0.85;
+}
+
+.queue-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.queue-card .top {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+}
+
+.queue-card .live-tag {
+  color: var(--live);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.queue-card .live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--live);
+}

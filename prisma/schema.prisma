@@ -1,0 +1,196 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  OWNER
+  PUBLIC
+}
+
+enum PlanTier {
+  Free
+  Tier1_30
+  Tier2_60
+  Tier3_90
+  Tier4_365
+}
+
+enum CreationModeType {
+  creator_mode
+  ai_autopilot
+}
+
+enum VideoStatus {
+  drafting
+  rendering
+  review
+  approved
+  uploaded
+  failed
+}
+
+enum JobStatus {
+  pending
+  running
+  paused
+  completed
+  failed
+}
+
+enum ChatRole {
+  user
+  assistant
+}
+
+model User {
+  id                     String    @id @default(uuid())
+  tenantId               String    @unique @map("tenant_id") @default(uuid())
+  email                  String    @unique
+  name                   String?
+  avatarUrl              String?   @map("avatar_url")
+  passwordHash           String?   @map("password_hash")
+  role                   UserRole  @default(PUBLIC)
+  planTier               PlanTier  @default(Free) @map("plan_tier")
+  activeCycleExpiresAt   DateTime? @map("active_cycle_expires_at")
+  autoRefreshEnabled     Boolean   @default(false) @map("auto_refresh_enabled")
+  createdAt              DateTime  @default(now()) @map("created_at")
+
+  oauthTokens        OAuthToken[]
+  channels           Channel[]
+  creationModes      CreationMode[]
+  automationCycles   AutomationCycle[]
+  automationJobs     AutomationJob[]
+  chatHistory        ChatMessage[]
+
+  @@map("users")
+}
+
+model OAuthToken {
+  id             String   @id @default(uuid())
+  userId         String   @map("user_id")
+  provider       String
+  accessToken    String   @map("access_token")
+  refreshToken   String?  @map("refresh_token")
+  expiresAt      DateTime? @map("expires_at")
+  grantedScopes  Json?    @map("granted_scopes")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, provider])
+  @@map("oauth_tokens")
+}
+
+model Channel {
+  id                String   @id @default(uuid())
+  userId            String   @map("user_id")
+  youtubeChannelId  String?  @map("youtube_channel_id")
+  title             String
+  niche             String?
+  isActive          Boolean  @default(true) @map("is_active")
+
+  user             User               @relation(fields: [userId], references: [id])
+  videos           Video[]
+  automationCycles AutomationCycle[]
+  automationJobs   AutomationJob[]
+  analytics        Analytics[]
+
+  @@map("channels")
+}
+
+model CreationMode {
+  id        String           @id @default(uuid())
+  userId    String           @map("user_id")
+  modeType  CreationModeType @map("mode_type")
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("creation_modes")
+}
+
+model Video {
+  id             String      @id @default(uuid())
+  channelId      String      @map("channel_id")
+  tenantId       String      @map("tenant_id")
+  status         VideoStatus @default(drafting)
+  title          String?
+  description    String?
+  scriptJson     Json?       @map("script_json")
+  storyboardJson Json?       @map("storyboard_json")
+  mediaUrls      Json?       @map("media_urls")
+  tags           String[]
+  contentHash    String      @unique @map("content_hash")
+  createdAt      DateTime    @default(now()) @map("created_at")
+
+  channel   Channel     @relation(fields: [channelId], references: [id])
+  analytics Analytics[]
+
+  @@map("videos")
+}
+
+model AutomationCycle {
+  id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  channelId    String   @map("channel_id")
+  durationDays Int      @map("duration_days")
+  startDate    DateTime @map("start_date")
+  endDate      DateTime @map("end_date")
+  isActive     Boolean  @default(true) @map("is_active")
+  autoRefresh  Boolean  @default(false) @map("auto_refresh")
+
+  user  User    @relation(fields: [userId], references: [id])
+  channel Channel @relation(fields: [channelId], references: [id])
+  jobs  AutomationJob[]
+
+  @@map("automation_cycles")
+}
+
+model AutomationJob {
+  id          String    @id @default(uuid())
+  cycleId     String?   @map("cycle_id")
+  userId      String    @map("user_id")
+  channelId   String    @map("channel_id")
+  status      JobStatus @default(pending)
+  currentStep String?   @map("current_step")
+  logsJson    Json?     @map("logs_json")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  cycle   AutomationCycle? @relation(fields: [cycleId], references: [id])
+  user    User             @relation(fields: [userId], references: [id])
+  channel Channel          @relation(fields: [channelId], references: [id])
+
+  @@map("automation_jobs")
+}
+
+model Analytics {
+  id              String   @id @default(uuid())
+  channelId       String   @map("channel_id")
+  videoId         String?  @map("video_id")
+  views           Int      @default(0)
+  ctr             Float?
+  watchTimeHours  Float?   @map("watch_time_hours")
+  retentionRate   Float?   @map("retention_rate")
+  recordedAt      DateTime @default(now()) @map("recorded_at")
+
+  channel Channel @relation(fields: [channelId], references: [id])
+  video   Video?  @relation(fields: [videoId], references: [id])
+
+  @@map("analytics")
+}
+
+model ChatMessage {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  role      ChatRole
+  content   String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("chat_history")
+}
