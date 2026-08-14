@@ -1,6 +1,10 @@
 import type { ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import './AppShell.css'
+import logo from '../assets/tubamintai-logo.svg';
+
+// then in JSX:
+<img src={logo} alt="Tubamintai" className="logo-img" />
 
 const navItems = [
   { label: 'Dashboard', path: '/dashboard' },
@@ -20,7 +24,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
     <div className="app-shell">
       <aside className="sidebar">
         <div className="brand-mark">
-          <img src="/src/assets/tubamintai-logo.svg" alt="Tubamintai" className="logo-img" />
+          <img src={logo} alt="Tubamintai" className="logo-img" />
         </div>
         {navItems.map((item) => (
           <Link to={item.path} key={item.label} style={{ textDecoration: 'none' }}>

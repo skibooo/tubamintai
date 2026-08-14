@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import logo from '../assets/tubamintai-logo.svg';
 
 export default function Signup() {
   const [email, setEmail] = useState('')
@@ -34,7 +35,7 @@ export default function Signup() {
   return (
     <div className="login-left" style={{ minHeight: '100vh', width: '100%' }}>
       <div className="brand-mark">
-        <img src="/src/assets/tubamintai-logo.svg" alt="Tubamintai" className="logo-img" />
+        <img src={logo} alt="Tubamintai" className="logo-img" />
       </div>
       <h2>Create your account</h2>
       <p>Start automating your channel in minutes.</p>

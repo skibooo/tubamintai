@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import './Login.css'
+import logo from '../assets/tubamintai-logo.svg';
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -37,7 +38,7 @@ export default function Login() {
     <div className="login-screen">
       <div className="login-left">
         <div className="brand-mark">
-          <img src="/src/assets/tubamintai-logo.svg" alt="Tubamintai" className="logo-img" />
+          <img src={logo} alt="Tubamintai" className="logo-img" />
         </div>
         <h2>Set it once.<br />It uploads itself.</h2>
         <p>Let AI Run Your Channel While You Focus on Growth.</p>
