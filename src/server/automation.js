@@ -23,6 +23,14 @@ automationRouter.post("/start", requireAuth, async (req, res) => {
       return res.status(404).json({ error: "Channel not found for this user" });
     }
 
+    const existingActiveCycle = await prisma.automationCycle.findFirst({
+      where: { channelId, isActive: true },
+    });
+
+    if (existingActiveCycle) {
+      return res.status(400).json({ error: "This channel already has an active automation cycle" });
+    }
+
     const startDate = new Date();
     const endDate = new Date(startDate);
     endDate.setDate(endDate.getDate() + Number(durationDays));
@@ -86,7 +94,7 @@ async function runPipelineForCycle(cycle) {
     },
   });
 
-  const BASE_URL = process.env.INTERNAL_API_URL || "http://https://tubamintai.onrender.com";
+  const BASE_URL = process.env.INTERNAL_API_URL || "http://localhost:3000";
 
   try {
     const channel = await prisma.channel.findUnique({ where: { id: cycle.channelId } });
@@ -94,15 +102,6 @@ async function runPipelineForCycle(cycle) {
       throw new Error("Channel not found for this cycle");
     }
 
-    const existingActiveCycle = await prisma.automationCycle.findFirst({
-  where: { channelId, isActive: true },
-});
-
-if (existingActiveCycle) {
-  return res.status(400).json({ error: "This channel already has an active automation cycle" });
-}
-
-    // Generate one internal auth token up front — every route below requires it
     const cycleUser = await prisma.user.findUnique({ where: { id: cycle.userId } });
     if (!cycleUser) {
       throw new Error("User not found for this cycle");
@@ -117,7 +116,7 @@ if (existingActiveCycle) {
       Authorization: `Bearer ${internalToken}`,
     };
 
-    // Step 1: Generate a specific topic within the niche
+    // Step 1: Topic
     await prisma.automationJob.update({ where: { id: job.id }, data: { currentStep: "topic" } });
     const topicRes = await fetch(`${BASE_URL}/api/ai/script`, {
       method: "POST",
@@ -133,7 +132,7 @@ if (existingActiveCycle) {
     }
     const generatedTopic = topicData.script;
 
-    // Step 2: Generate the real script
+    // Step 2: Script
     await prisma.automationJob.update({ where: { id: job.id }, data: { currentStep: "script" } });
     const scriptRes = await fetch(`${BASE_URL}/api/ai/script`, {
       method: "POST",
