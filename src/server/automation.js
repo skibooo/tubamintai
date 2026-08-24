@@ -94,7 +94,7 @@ async function runPipelineForCycle(cycle) {
     },
   });
 
-  const BASE_URL = process.env.INTERNAL_API_URL || "http://127.0.0.1:3000";
+  const BASE_URL = process.env.INTERNAL_API_URL || `http://127.0.0.1:${process.env.PORT || 3000}`;
 
   try {
     const channel = await prisma.channel.findUnique({ where: { id: cycle.channelId } });
