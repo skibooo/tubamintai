@@ -245,12 +245,12 @@ async function runPipelineForCycle(cycle) {
 
     console.log(`[Automation] Job ${job.id} completed for channel ${cycle.channelId}`);
   } catch (err) {
-    console.error(`[Automation] Job ${job.id} failed:`, err.message);
-    await prisma.automationJob.update({
-      where: { id: job.id },
-      data: { status: "failed", logsJson: { error: err.message } },
-    });
-  }
+  console.error(`[Automation] Job ${job.id} failed:`, err.message, err.cause || "", err.stack || "");
+  await prisma.automationJob.update({
+    where: { id: job.id },
+    data: { status: "failed", logsJson: { error: err.message, cause: String(err.cause || "none") } },
+  });
+}
 }
 
 // Runs once a day — checks all active cycles and processes each one
