@@ -2,11 +2,12 @@ import { Router } from "express";
 import cron from "node-cron";
 import { prisma } from "./prisma.js";
 import { requireAuth } from "./middleware.js";
-import jwt from "jsonwebtoken";
+import { generateScript, generateMetadata } from "./ai.js";
+import { generateVoice, generateSubtitlesForAudio, generateImage, renderVideo } from "./media.js";
+import { uploadVideoForUser } from "./youtube.js";
 
 export const automationRouter = Router();
 
-// POST /api/automation/start — create a real automation cycle for a channel
 automationRouter.post("/start", requireAuth, async (req, res) => {
   try {
     const { channelId, durationDays, autoRefresh } = req.body;
@@ -48,7 +49,6 @@ automationRouter.post("/start", requireAuth, async (req, res) => {
     });
 
     console.log(`[Automation] Started ${durationDays}-day cycle (${cycle.id}) for channel ${channelId}`);
-
     res.json({ success: true, cycle });
   } catch (err) {
     console.error(err);
@@ -56,12 +56,9 @@ automationRouter.post("/start", requireAuth, async (req, res) => {
   }
 });
 
-// GET /api/automation/cycles — list all automation cycles for the logged-in user
 automationRouter.get("/cycles", requireAuth, async (req, res) => {
   try {
-    const cycles = await prisma.automationCycle.findMany({
-      where: { userId: req.user.id },
-    });
+    const cycles = await prisma.automationCycle.findMany({ where: { userId: req.user.id } });
     res.json(cycles);
   } catch (err) {
     console.error(err);
@@ -69,7 +66,6 @@ automationRouter.get("/cycles", requireAuth, async (req, res) => {
   }
 });
 
-// TEMP debug route — manually trigger a pipeline run for testing (remove before production)
 automationRouter.post("/test-run/:cycleId", requireAuth, async (req, res) => {
   try {
     const cycle = await prisma.automationCycle.findUnique({ where: { id: req.params.cycleId } });
@@ -82,7 +78,7 @@ automationRouter.post("/test-run/:cycleId", requireAuth, async (req, res) => {
   }
 });
 
-// Runs the full content pipeline for one automation cycle
+// Runs the full content pipeline — now direct function calls, no HTTP self-calls
 async function runPipelineForCycle(cycle) {
   const job = await prisma.automationJob.create({
     data: {
@@ -94,149 +90,57 @@ async function runPipelineForCycle(cycle) {
     },
   });
 
-  const BASE_URL = process.env.INTERNAL_API_URL || `http://127.0.0.1:${process.env.PORT || 3000}`;
-
   try {
     const channel = await prisma.channel.findUnique({ where: { id: cycle.channelId } });
-    if (!channel) {
-      throw new Error("Channel not found for this cycle");
-    }
+    if (!channel) throw new Error("Channel not found for this cycle");
 
-    const cycleUser = await prisma.user.findUnique({ where: { id: cycle.userId } });
-    if (!cycleUser) {
-      throw new Error("User not found for this cycle");
-    }
-    const internalToken = jwt.sign(
-      { userId: cycleUser.id, tenantId: cycleUser.tenantId, role: cycleUser.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "10m" }
-    );
-    const authHeaders = {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${internalToken}`,
-    };
-
-    // Step 1: Topic
     await prisma.automationJob.update({ where: { id: job.id }, data: { currentStep: "topic" } });
-    const topicRes = await fetch(`${BASE_URL}/api/ai/script`, {
-      method: "POST",
-      headers: authHeaders,
-      body: JSON.stringify({
-        niche: channel.niche,
-        topic: `Generate ONE specific, narrow video topic idea within the "${channel.niche}" niche — something concrete and interesting, not a repeat of common obvious ideas. Reply with ONLY the topic itself, nothing else.`,
-      }),
-    });
-    const topicData = await topicRes.json();
-    if (!topicData.script) {
-      throw new Error(`Topic generation failed: ${topicData.error || "no script returned"}`);
-    }
-    const generatedTopic = topicData.script;
+    const generatedTopic = await generateScript(
+      channel.niche,
+      `Generate ONE specific, narrow video topic idea within the "${channel.niche}" niche — something concrete and interesting, not a repeat of common obvious ideas. Reply with ONLY the topic itself, nothing else.`
+    );
 
-    // Step 2: Script
     await prisma.automationJob.update({ where: { id: job.id }, data: { currentStep: "script" } });
-    const scriptRes = await fetch(`${BASE_URL}/api/ai/script`, {
-      method: "POST",
-      headers: authHeaders,
-      body: JSON.stringify({ niche: channel.niche, topic: generatedTopic }),
-    });
-    const scriptData = await scriptRes.json();
-    if (!scriptData.script) {
-      throw new Error(`Script generation failed: ${scriptData.error || "no script returned"}`);
-    }
-    const script = scriptData.script;
+    const script = await generateScript(channel.niche, generatedTopic);
 
-    // Step 3: Metadata
     await prisma.automationJob.update({ where: { id: job.id }, data: { currentStep: "metadata" } });
-    const metaRes = await fetch(`${BASE_URL}/api/ai/metadata`, {
-      method: "POST",
-      headers: authHeaders,
-      body: JSON.stringify({ script }),
-    });
-    const metadata = await metaRes.json();
-    if (!metadata.title) {
-      throw new Error(`Metadata generation failed: ${metadata.error || "no title returned"}`);
-    }
+    const metadata = await generateMetadata(script, channel.niche);
+    if (!metadata.title) throw new Error("Metadata generation returned no title");
 
-    // Step 4: Voice
     await prisma.automationJob.update({ where: { id: job.id }, data: { currentStep: "voice" } });
-    const voiceRes = await fetch(`${BASE_URL}/api/media/voice`, {
-      method: "POST",
-      headers: authHeaders,
-      body: JSON.stringify({ text: script }),
-    });
-    const voiceData = await voiceRes.json();
-    if (!voiceData.audioUrl) {
-      throw new Error(`Voice generation failed: ${voiceData.error || "no audioUrl returned"}`);
-    }
-    const audioUrl = voiceData.audioUrl;
+    const audioUrl = await generateVoice(script);
     const audioFileName = audioUrl.split("/").pop();
 
-    // Step 5: Subtitles
     await prisma.automationJob.update({ where: { id: job.id }, data: { currentStep: "subtitles" } });
-    const subRes = await fetch(`${BASE_URL}/api/media/subtitles`, {
-      method: "POST",
-      headers: authHeaders,
-      body: JSON.stringify({ audioFileName }),
-    });
-    const subData = await subRes.json();
-    if (!subData.url) {
-      throw new Error(`Subtitle generation failed: ${subData.error || "no url returned"}`);
-    }
-    const srtUrl = subData.url;
+    const srtUrl = await generateSubtitlesForAudio(audioFileName);
 
-    // Step 6: Images
     await prisma.automationJob.update({ where: { id: job.id }, data: { currentStep: "images" } });
     const imageUrls = [];
     for (let i = 0; i < 5; i++) {
-      const imgRes = await fetch(`${BASE_URL}/api/media/image`, {
-        method: "POST",
-        headers: authHeaders,
-        body: JSON.stringify({ prompt: `${channel.niche}, scene ${i + 1}, cinematic` }),
-      });
-      const imgData = await imgRes.json();
-
-      if (imgData.imageUrl) {
-        imageUrls.push(imgData.imageUrl);
-      } else {
-        console.error(`[Automation] Image ${i + 1} failed to generate:`, imgData.error || "unknown error");
+      try {
+        const imageUrl = await generateImage(`${channel.niche}, scene ${i + 1}, cinematic`);
+        imageUrls.push(imageUrl);
+      } catch (imgErr) {
+        console.error(`[Automation] Image ${i + 1} failed:`, imgErr.message);
       }
     }
-    if (imageUrls.length === 0) {
-      throw new Error("All image generations failed — cannot render video with zero images");
-    }
+    if (imageUrls.length === 0) throw new Error("All image generations failed — cannot render video");
 
-    // Step 7: Render
     await prisma.automationJob.update({ where: { id: job.id }, data: { currentStep: "render" } });
-    const renderRes = await fetch(`${BASE_URL}/api/media/render`, {
-      method: "POST",
-      headers: authHeaders,
-      body: JSON.stringify({ audioUrl, imageUrls, srtUrl }),
-    });
-    const renderData = await renderRes.json();
-    if (!renderData.videoUrl) {
-      throw new Error(`Render failed: ${renderData.error || "no videoUrl returned"}`);
-    }
-    const videoUrl = renderData.videoUrl;
+    const renderResult = await renderVideo({ audioUrl, imageUrls, srtUrl });
+    if (!renderResult.videoUrl) throw new Error("Render failed — no videoUrl returned");
+    const videoUrl = renderResult.videoUrl;
 
-    // Step 8: Upload
     await prisma.automationJob.update({ where: { id: job.id }, data: { currentStep: "upload" } });
     const videoFileName = videoUrl.split("/").pop();
-
-    const uploadRes = await fetch(`${BASE_URL}/api/youtube/upload`, {
-      method: "POST",
-      headers: authHeaders,
-      body: JSON.stringify({
-        videoFileName,
-        title: metadata.title,
-        description: metadata.description,
-        tags: metadata.tags,
-        privacyStatus: "public",
-      }),
+    const uploadResult = await uploadVideoForUser({
+      userId: cycle.userId,
+      videoFileName,
+      title: metadata.title,
+      description: metadata.description,
+      tags: metadata.tags,
+      privacyStatus: "public",
     });
-    const uploadResult = await uploadRes.json();
-    if (!uploadRes.ok) {
-      throw new Error(`YouTube upload failed: ${uploadResult.error || "unknown error"}`);
-    }
 
     await prisma.automationJob.update({
       where: { id: job.id },
@@ -245,19 +149,17 @@ async function runPipelineForCycle(cycle) {
 
     console.log(`[Automation] Job ${job.id} completed for channel ${cycle.channelId}`);
   } catch (err) {
-  console.error(`[Automation] Job ${job.id} failed:`, err.message, err.cause || "", err.stack || "");
-  await prisma.automationJob.update({
-    where: { id: job.id },
-    data: { status: "failed", logsJson: { error: err.message, cause: String(err.cause || "none") } },
-  });
-}
+    console.error(`[Automation] Job ${job.id} failed:`, err.message);
+    await prisma.automationJob.update({
+      where: { id: job.id },
+      data: { status: "failed", logsJson: { error: err.message } },
+    });
+  }
 }
 
-// Runs once a day — checks all active cycles and processes each one
 function startAutomationScheduler() {
   cron.schedule("0 0 * * *", async () => {
     console.log("[Scheduler] Running daily automation check...");
-
     const now = new Date();
 
     const activeCycles = await prisma.automationCycle.findMany({
@@ -265,7 +167,6 @@ function startAutomationScheduler() {
     });
 
     console.log(`[Scheduler] Found ${activeCycles.length} active cycle(s)`);
-
     for (const cycle of activeCycles) {
       await runPipelineForCycle(cycle);
     }
@@ -279,19 +180,13 @@ function startAutomationScheduler() {
         const newStartDate = new Date();
         const newEndDate = new Date(newStartDate);
         newEndDate.setDate(newEndDate.getDate() + cycle.durationDays);
-
         await prisma.automationCycle.update({
           where: { id: cycle.id },
           data: { startDate: newStartDate, endDate: newEndDate },
         });
-
         console.log(`[Scheduler] Auto-refreshed cycle ${cycle.id}`);
       } else {
-        await prisma.automationCycle.update({
-          where: { id: cycle.id },
-          data: { isActive: false },
-        });
-
+        await prisma.automationCycle.update({ where: { id: cycle.id }, data: { isActive: false } });
         console.log(`[Scheduler] Cycle ${cycle.id} ended (no auto-refresh)`);
       }
     }
