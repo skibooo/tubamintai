@@ -20,7 +20,7 @@ export async function generateScript(niche, topic) {
 Structure it with a hook in the first line, then body content, then a short call-to-action ending. Return plain text only, no markdown formatting.`;
 
   const completion = await getOpenAI().chat.completions.create({
-    model: "llama-3.3-70b-versatile",
+    model: "openai/gpt-oss-120b",
     messages: [{ role: "user", content: prompt }],
   });
 
@@ -38,7 +38,7 @@ Script:
 ${script}`;
 
   const completion = await getOpenAI().chat.completions.create({
-    model: "llama-3.3-70b-versatile",
+    model: "openai/gpt-oss-120b",
     messages: [{ role: "user", content: prompt }],
     response_format: { type: "json_object" },
   });
